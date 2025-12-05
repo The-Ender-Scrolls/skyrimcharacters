@@ -16,7 +16,7 @@ public class SkyrimCharactersFabric implements ModInitializer
     public static AttachmentType<PlayerCharacter> CHARACTER_DATA =
             AttachmentRegistryImpl.<PlayerCharacter>builder()
                     .initializer(PlayerCharacter::new)
-                    .persistent(PlayerCharacter.CODEC)
+                    .persistent(PlayerCharacter.CODEC.codec())
                     .buildAndRegister(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "playercharacter"));
 
     @Override

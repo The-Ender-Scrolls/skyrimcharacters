@@ -2,6 +2,8 @@ package com.ryankshah.skyrimcharacters.network;
 
 import com.ryankshah.skyrimcharacters.Constants;
 import com.ryankshah.skyrimcharacters.client.screen.CharacterCreationScreen;
+import com.ryankshah.skyrimcharacters.data.PlayerCharacter;
+import com.ryankshah.skyrimcharacters.platform.Services;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
@@ -37,22 +39,25 @@ public record OpenCharacterCreationScreen(boolean hasSetup)
 
     public static void handleServer(PacketContext<OpenCharacterCreationScreen> context) {
         ServerPlayer player = context.sender();
-//        Character character = Character.get(player);
-//
-//        character.setHasSetup(true);
+        PlayerCharacter character = Services.PLATFORM.getPlayerCharacter(player);
 
-        final OpenCharacterCreationScreen sendToClient = new OpenCharacterCreationScreen(false); //context.message().hasSetup);
+        // Check if character has already been created
+        boolean characterCreated = character.isCharacterCreated();
+
+        final OpenCharacterCreationScreen sendToClient = new OpenCharacterCreationScreen(characterCreated);
         Dispatcher.sendToClient(sendToClient, player);
-//      PacketDistributor.PLAYER.with(player).send(sendToClient);
     }
 
     public static void handleClient(PacketContext<OpenCharacterCreationScreen> context) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.execute(() -> {
             Player player = Minecraft.getInstance().player;
-//            Character character = Character.get(player);
-//            character.setHasSetup(true);
-            Minecraft.getInstance().setScreen(new CharacterCreationScreen());
+
+            // Only open character creation screen if character hasn't been created yet
+            if (!context.message().hasSetup) {
+                Minecraft.getInstance().setScreen(new CharacterCreationScreen());
+            }
+            // If hasSetup is true, character was already created, so don't open the screen
         });
     }
 

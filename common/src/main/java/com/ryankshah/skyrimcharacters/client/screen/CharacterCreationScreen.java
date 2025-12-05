@@ -1,6 +1,10 @@
 package com.ryankshah.skyrimcharacters.client.screen;
 
 import com.ryankshah.skyrimcharacters.Constants;
+import com.ryankshah.skyrimcharacters.data.PlayerCharacter;
+import com.ryankshah.skyrimcharacters.data.Race;
+import com.ryankshah.skyrimcharacters.network.UpdatePlayerCharacter;
+import commonnetwork.api.Dispatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -60,7 +64,7 @@ public class CharacterCreationScreen extends Screen
     // Character customization options
     private int selectedRace = 0;
     private boolean isMale = true;
-    private float skinTone = 0.0f;  // 0.0 to 1.0
+    private float skinTone = 0.5f;  // 0.0 to 1.0
     private float hairStyle = 0.0f;  // 0.0 to 1.0 (discretized to styles)
     private float hairColor = 0.0f;  // 0.0 to 1.0
     private float eyeColor = 0.0f;   // 0.0 to 1.0
@@ -427,7 +431,26 @@ public class CharacterCreationScreen extends Screen
     }
 
     private void finishCharacterCreation() {
-        // TODO: Send character data to server
+        // Map selected race index to Race object
+        Race selectedRaceObject = Race.getRaces().get(selectedRace);
+
+        // Create PlayerCharacter with all customization data and characterCreated flag set to true
+        PlayerCharacter character = new PlayerCharacter(
+                true,                   // characterCreated
+                selectedRaceObject,     // race
+                isMale,                 // isMale
+                skinTone,               // skinTone
+                hairStyle,              // hairStyle
+                hairColor,              // hairColor
+                eyeColor,               // eyeColor
+                noseShape,              // noseShape
+                mouthShape,             // mouthShape
+                browShape               // browShape
+        );
+
+        // Send character data to server
+        Dispatcher.sendToServer(new UpdatePlayerCharacter(character));
+
         this.onClose();
     }
 
